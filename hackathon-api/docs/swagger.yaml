@@ -1,0 +1,949 @@
+swagger: '2.0'
+info:
+  description: This is API for hackathon 2018
+  version: 1.0.0
+  title: Hackathon API
+  # put the contact info for your development or API team
+  contact:
+    email: tao_wang@epam.com
+
+  license:
+    name: Apache 2.0
+    url: http://www.apache.org/licenses/LICENSE-2.0.html
+
+# tags are used for organizing operations
+tags:
+- name: admins
+  description: Secured Admin-only calls
+- name: users
+  description: Operations available to all users
+- name: anonymous
+  description: for anonymous
+
+securityDefinitions:
+  basicAuth:
+    type: basic
+# To apply Basic auth to the whole API:
+security:
+- basicAuth: []
+
+produces:
+- application/json
+
+responses:
+  UnauthorizedError:
+    description: Authentication information is missing or invalid
+    headers:
+      WWW_Authenticate:
+        type: string
+
+paths:
+  /me:
+    get:
+      tags:
+      - users
+      summary: get me
+      operationId: getMe
+      responses:
+        200:
+          description: OK
+          schema:
+            $ref: '#/definitions/Profile'
+        401:
+          $ref: '#/responses/UnauthorizedError'
+        500:
+          description: Unexpected error
+    post:
+      tags:
+      - anonymous
+      summary: register me
+      operationId: registerMe
+      security: []
+      parameters:
+      - in: body
+        name: user
+        description: the user to create
+        schema:
+          $ref: '#/definitions/User'
+      responses:
+        201:
+          description: created
+        400:
+          description: invalid input, object invalid
+        409:
+          description: an existing item already exists
+        500:
+          description: Unexpected error
+    patch:
+      tags:
+      - users
+      summary: change password
+      operationId: changePassword
+      consumes:
+      - application/json
+      parameters:
+      - in: body
+        name: user
+        description: The user to update
+        schema:
+          $ref: '#/definitions/User'
+      responses:
+        204:
+          description: updated
+        400:
+          description: bad input parameter
+        401:
+          $ref: '#/responses/UnauthorizedError'
+        500:
+          description: Unexpected error
+    put:
+      tags:
+      - users
+      summary: update me
+      operationId: updateMe
+      consumes:
+      - application/json
+      parameters:
+      - in: body
+        name: profile
+        description: The user to update
+        schema:
+          $ref: '#/definitions/Profile'
+      responses:
+        204:
+          description: updated
+        400:
+          description: bad input parameter
+        401:
+          $ref: '#/responses/UnauthorizedError'
+        500:
+          description: Unexpected error
+    delete:
+      tags:
+      - users
+      summary: delete me
+      operationId: deleteMe
+      responses:
+        204:
+          description: deleted
+        401:
+          $ref: '#/responses/UnauthorizedError'
+        500:
+          description: Unexpected error
+  /health-checks:
+    get:
+      tags:
+      - users
+      summary: get all health checks for me
+      operationId: getHealthChecks
+      responses:
+        200:
+          description: OK
+          schema:
+            type: array
+            items:
+              $ref: '#/definitions/HealthCheck'
+        401:
+          $ref: '#/responses/UnauthorizedError'
+        500:
+          description: Unexpected error
+  /notifications:
+    get:
+      tags:
+      - users
+      summary: get all notifications for me
+      operationId: getNotifications
+      responses:
+        200:
+          description: OK
+          schema:
+            type: array
+            items:
+              $ref: '#/definitions/Notification'
+        401:
+          $ref: '#/responses/UnauthorizedError'
+        500:
+          description: Unexpected error
+  /notifications/{id}:
+    parameters:
+    - in: path
+      name: id
+      type: string
+      format: uuid
+      required: true
+      description: uuid ID of the notification
+    get:
+      tags:
+      - users
+      summary: get notification
+      operationId: getNotification
+      responses:
+        200:
+          description: OK
+          schema:
+            $ref: '#/definitions/Notification'
+        401:
+          $ref: '#/responses/UnauthorizedError'
+        404:
+          description: not found
+        500:
+          description: Unexpected error
+    patch:
+      tags:
+      - users
+      summary: read notification
+      operationId: readNotification
+      responses:
+        204:
+          description: updated
+        401:
+          $ref: '#/responses/UnauthorizedError'
+        404:
+          description: not found
+        500:
+          description: Unexpected error
+    delete:
+      tags:
+      - users
+      summary: delete notification
+      operationId: deleteNotification
+      responses:
+        204:
+          description: deleted
+        401:
+          $ref: '#/responses/UnauthorizedError'
+        404:
+          description: not found
+        500:
+          description: Unexpected error
+  /users:
+    get:
+      tags:
+      - admins
+      summary: get all users
+      operationId: getUsers
+      responses:
+        200:
+          description: OK
+          schema:
+            type: array
+            items:
+              $ref: '#/definitions/User'
+        401:
+          $ref: '#/responses/UnauthorizedError'
+        500:
+          description: Unexpected error
+  /users/{id}:
+    parameters:
+    - in: path
+      name: id
+      type: string
+      format: uuid
+      required: true
+      description: uuid ID of the user
+    get:
+      tags:
+      - admins
+      summary: get user
+      operationId: getUser
+      responses:
+        200:
+          description: OK
+          schema:
+            $ref: '#/definitions/User'
+        401:
+          $ref: '#/responses/UnauthorizedError'
+        404:
+          description: not found
+        500:
+          description: Unexpected error
+    put:
+      tags:
+      - admins
+      summary: update user
+      operationId: updateUser
+      consumes:
+      - application/json
+      parameters:
+      - in: body
+        name: user
+        description: user to update
+        schema:
+          $ref: '#/definitions/User'
+      responses:
+        204:
+          description: updated
+        400:
+          description: invalid input, object invalid
+        401:
+          $ref: '#/responses/UnauthorizedError'
+        404:
+          description: not found
+        500:
+          description: Unexpected error
+    delete:
+      tags:
+      - admins
+      summary: delete user
+      operationId: deleteUser
+      responses:
+        204:
+          description: deleted
+        401:
+          $ref: '#/responses/UnauthorizedError'
+        404:
+          description: not found
+        500:
+          description: Unexpected error
+  /users/{id}/notifications:
+    parameters:
+    - in: path
+      name: id
+      type: string
+      format: uuid
+      required: true
+      description: uuid ID of the user
+    get:
+      tags:
+      - admins
+      summary: get all notifications for user
+      operationId: getNotificationsByUser
+      responses:
+        200:
+          description: OK
+          schema:
+            type: array
+            items:
+              $ref: '#/definitions/Notification'
+        401:
+          $ref: '#/responses/UnauthorizedError'
+        500:
+          description: Unexpected error
+    post:
+      tags:
+      - admins
+      summary: create notification for user
+      operationId: createNotification
+      consumes:
+      - application/json
+      parameters:
+      - in: body
+        name: notification
+        description: notification to add
+        schema:
+          $ref: '#/definitions/Notification'
+      responses:
+        201:
+          description: created
+        400:
+          description: invalid input, object invalid
+        401:
+          $ref: '#/responses/UnauthorizedError'
+        409:
+          description: an existing item already exists
+        500:
+          description: Unexpected error
+  /watch-groups:
+    get:
+      tags:
+      - users
+      summary: get all watch groups for user
+      operationId: getWatchGroups
+      responses:
+        200:
+          description: OK
+          schema:
+            type: array
+            items:
+              $ref: '#/definitions/WatchGroup'
+        401:
+          $ref: '#/responses/UnauthorizedError'
+        500:
+          description: Unexpected error
+    post:
+      tags:
+      - users
+      summary: create watch group
+      operationId: createWatchGroup
+      consumes:
+      - application/json
+      parameters:
+      - in: body
+        name: watchGroup
+        description: watch group to add
+        schema:
+          $ref: '#/definitions/WatchGroup'
+      responses:
+        201:
+          description: created
+        400:
+          description: invalid input, object invalid
+        401:
+          $ref: '#/responses/UnauthorizedError'
+        409:
+          description: an existing item already exists
+        500:
+          description: Unexpected error
+  /watch-groups/{id}:
+    parameters:
+    - in: path
+      name: id
+      type: string
+      format: uuid
+      required: true
+      description: uuid ID of the watch group
+    get:
+      tags:
+      - users
+      summary: get watch group
+      operationId: getWatchGroup
+      responses:
+        200:
+          description: OK
+          schema:
+            $ref: '#/definitions/WatchGroup'
+        401:
+          $ref: '#/responses/UnauthorizedError'
+        404:
+          description: not found
+        500:
+          description: Unexpected error
+    put:
+      tags:
+      - users
+      summary: update watch group
+      operationId: updateWatchGroup
+      consumes:
+      - application/json
+      parameters:
+      - in: body
+        name: watchGroup
+        description: watch group to update
+        schema:
+          $ref: '#/definitions/WatchGroup'
+      responses:
+        204:
+          description: updated
+        400:
+          description: invalid input, object invalid
+        401:
+          $ref: '#/responses/UnauthorizedError'
+        404:
+          description: not found
+        500:
+          description: Unexpected error
+    delete:
+      tags:
+      - users
+      summary: delete watch group
+      operationId: deleteWatchGroup
+      responses:
+        204:
+          description: deleted
+        401:
+          $ref: '#/responses/UnauthorizedError'
+        404:
+          description: not found
+        500:
+          description: Unexpected error
+  /watch-groups/{id}/members:
+    parameters:
+    - in: path
+      name: id
+      type: string
+      format: uuid
+      required: true
+      description: uuid ID of the watch group
+    get:
+      tags:
+      - users
+      summary: get all members of the watch group
+      operationId: getMembers
+      responses:
+        200:
+          description: OK
+          schema:
+            type: array
+            items:
+              $ref: '#/definitions/Member'
+        401:
+          $ref: '#/responses/UnauthorizedError'
+        500:
+          description: Unexpected error
+    post:
+      tags:
+      - users
+      summary: add member
+      operationId: addMember
+      consumes:
+      - application/json
+      parameters:
+      - in: body
+        name: member
+        description: watch group to add
+        schema:
+          $ref: '#/definitions/Member'
+      responses:
+        201:
+          description: created
+        400:
+          description: invalid input, object invalid
+        401:
+          $ref: '#/responses/UnauthorizedError'
+        409:
+          description: an existing item already exists
+        500:
+          description: Unexpected error
+  /members/{id}:
+    parameters:
+    - in: path
+      name: id
+      type: string
+      format: uuid
+      required: true
+      description: uuid ID of the member
+    get:
+      tags:
+      - users
+      summary: get member
+      operationId: getMember
+      responses:
+        200:
+          description: OK
+          schema:
+            $ref: '#/definitions/Member'
+        401:
+          $ref: '#/responses/UnauthorizedError'
+        404:
+          description: not found
+        500:
+          description: Unexpected error
+    put:
+      tags:
+      - users
+      summary: update member
+      operationId: updateMember
+      consumes:
+      - application/json
+      parameters:
+      - in: body
+        name: member
+        description: member to update
+        schema:
+          $ref: '#/definitions/Member'
+      responses:
+        204:
+          description: updated
+        400:
+          description: invalid input, object invalid
+        401:
+          $ref: '#/responses/UnauthorizedError'
+        404:
+          description: not found
+        500:
+          description: Unexpected error
+    delete:
+      tags:
+      - users
+      summary: remove member
+      operationId: removeMember
+      responses:
+        204:
+          description: deleted
+        401:
+          $ref: '#/responses/UnauthorizedError'
+        404:
+          description: not found
+        500:
+          description: Unexpected error
+  /members/{id}/health-reports:
+    parameters:
+    - in: path
+      name: id
+      type: string
+      format: uuid
+      required: true
+      description: uuid ID of the member
+    get:
+      tags:
+      - users
+      summary: get health reports
+      operationId: getHealthReportsByMember
+      responses:
+        200:
+          description: OK
+          schema:
+            type: array
+            items:
+              $ref: '#/definitions/HealthReport'
+        401:
+          $ref: '#/responses/UnauthorizedError'
+        500:
+          description: Unexpected error
+    post:
+      tags:
+      - admins
+      summary: create health report
+      operationId: createHealthReport
+      consumes:
+      - application/json
+      parameters:
+      - in: body
+        name: healthReport
+        description: health report to add
+        schema:
+          $ref: '#/definitions/HealthReport'
+      responses:
+        201:
+          description: created
+        400:
+          description: invalid input, object invalid
+        401:
+          $ref: '#/responses/UnauthorizedError'
+        409:
+          description: an existing item already exists
+        500:
+          description: Unexpected error
+  /watchdogs:
+    get:
+      tags:
+      - users
+      summary: get all watchdogs of system
+      operationId: getWatchdogs
+      responses:
+        200:
+          description: OK
+          schema:
+            type: array
+            items:
+              $ref: '#/definitions/Watchdog'
+        401:
+          $ref: '#/responses/UnauthorizedError'
+        500:
+          description: Unexpected error
+    post:
+      tags:
+      - admins
+      summary: create watchdog
+      operationId: createWatchdog
+      consumes:
+      - application/json
+      parameters:
+      - in: body
+        name: watchdog
+        description: watchdog to add
+        schema:
+          $ref: '#/definitions/Watchdog'
+      responses:
+        201:
+          description: created
+        400:
+          description: invalid input, object invalid
+        401:
+          $ref: '#/responses/UnauthorizedError'
+        409:
+          description: an existing item already exists
+        500:
+          description: Unexpected error
+  /watchdogs/{id}:
+    parameters:
+    - in: path
+      name: id
+      type: string
+      format: uuid
+      required: true
+      description: uuid ID of the watchdog
+    get:
+      tags:
+      - users
+      summary: get watchdog
+      operationId: getWatchdog
+      responses:
+        200:
+          description: OK
+          schema:
+            $ref: '#/definitions/Watchdog'
+        401:
+          $ref: '#/responses/UnauthorizedError'
+        404:
+          description: not found
+        500:
+          description: Unexpected error
+    put:
+      tags:
+      - admins
+      summary: update watchdog
+      operationId: updateWatchdog
+      consumes:
+      - application/json
+      parameters:
+      - in: body
+        name: watchdog
+        description: watchdog to update
+        schema:
+          $ref: '#/definitions/Watchdog'
+      responses:
+        204:
+          description: updated
+        400:
+          description: invalid input, object invalid
+        401:
+          $ref: '#/responses/UnauthorizedError'
+        404:
+          description: not found
+        500:
+          description: Unexpected error
+    delete:
+      tags:
+      - admins
+      summary: delete watchdog
+      operationId: deleteWatchdog
+      responses:
+        204:
+          description: deleted
+        401:
+          $ref: '#/responses/UnauthorizedError'
+        404:
+          description: not found
+        500:
+          description: Unexpected error
+  /watchdogs/{id}/health-checks:
+    parameters:
+    - in: path
+      name: id
+      type: string
+      format: uuid
+      required: true
+      description: uuid ID of the watchdog
+    get:
+      tags:
+      - users
+      summary: get health checks from the watchdog
+      operationId: getHealthChecksByWatchdog
+      responses:
+        200:
+          description: OK
+          schema:
+            type: array
+            items:
+              $ref: '#/definitions/HealthCheck'
+        401:
+          $ref: '#/responses/UnauthorizedError'
+        500:
+          description: Unexpected error
+    post:
+      tags:
+      - admins
+      summary: create health check
+      operationId: createHealthCheck
+      consumes:
+      - application/json
+      parameters:
+      - in: body
+        name: healthCheck
+        description: health check to add
+        schema:
+          $ref: '#/definitions/HealthCheck'
+      responses:
+        201:
+          description: created
+        400:
+          description: invalid input, object invalid
+        401:
+          $ref: '#/responses/UnauthorizedError'
+        409:
+          description: an existing item already exists
+        500:
+          description: Unexpected error
+  /health-reports/{id}:
+    parameters:
+    - in: path
+      name: id
+      type: string
+      format: uuid
+      required: true
+      description: uuid ID of the health report
+    get:
+      tags:
+      - users
+      summary: get health report
+      operationId: getHealthReport
+      responses:
+        200:
+          description: OK
+          schema:
+            $ref: '#/definitions/HealthReport'
+        401:
+          $ref: '#/responses/UnauthorizedError'
+        404:
+          description: not found
+        500:
+          description: Unexpected error
+  /health-reports/{id}/health-checks:
+    parameters:
+    - in: path
+      name: id
+      type: string
+      format: uuid
+      required: true
+      description: uuid ID of the health report
+    get:
+      tags:
+      - users
+      summary: get health checks from the health report
+      operationId: getHealthChecksByHealthReport
+      responses:
+        200:
+          description: OK
+          schema:
+            type: array
+            items:
+              $ref: '#/definitions/HealthCheck'
+        401:
+          $ref: '#/responses/UnauthorizedError'
+        500:
+          description: Unexpected error
+
+definitions:
+  User:
+    type: object
+    required:
+    - id
+    - password
+    properties:
+      id:
+        type: string
+        format: email
+        example: tao_wang@epam.com
+      password:
+        type: string
+        format: password
+        example: p@$$w0rd
+      profile:
+        $ref: '#/definitions/Profile'
+  Profile:
+    type: object
+    required:
+    - name
+    - birthday
+    - gender
+    properties:
+      name:
+        type: string
+        example: Tao Wang
+      birthday:
+        type: string
+        format: date
+        example: '1983-08-29'
+      gender:
+        type: string
+        enum: [male, female]
+        example: male
+  Member:
+    type: object
+    required:
+    - user
+    properties:
+      id:
+        type: string
+        format: uuid
+        example: d390f1ee-6c54-4b01-90e6-d701748f0851
+      role:
+        type: string
+        enum: [member, maintainer, reporter]
+        default: member
+      user:
+        type: string
+        format: email
+        example: tao_wang@epam.com
+  WatchGroup:
+    type: object
+    required:
+    - name
+    properties:
+      id:
+        type: string
+        format: uuid
+        example: d290f1ee-6c54-4b01-90e6-d701748f0851
+      name:
+        type: string
+        example: My Family
+  Watchdog:
+    type: object
+    required:
+    - name
+    - spec
+    properties:
+      id:
+        type: string
+        format: uuid
+        example: c290f1ee-6c54-4b01-90e6-d701748f0851
+      name:
+        type: string
+        example: Heart Rate
+      spec:
+        type: array
+        items:
+          type: number
+        example: [60, 80]
+  HealthCheck:
+    type: object
+    required:
+    - result
+    properties:
+      id:
+        type: string
+        format: uuid
+        example: c290f1ee-6c54-4b01-90e6-d701748f0851
+      result:
+        type: number
+        example: 80
+      createdAt:
+        type: string
+        format: date-time
+        example: 2018-11-16T16:32:28Z
+  HealthReport:
+    type: object
+    properties:
+      id:
+        type: string
+        format: uuid
+        example: b290f1ee-6c54-4b01-90e6-d701748f0851
+      state:
+        type: string
+        enum: [healthy, unhealthy, unknown]
+        default: unknown
+      createdAt:
+        type: string
+        format: date-time
+        example: 2018-11-16T16:32:28Z
+  Notification:
+    type: object
+    required:
+    - message
+    - source
+    properties:
+      id:
+        type: string
+        format: uuid
+        example: b490f1ee-6c54-4b01-90e6-d701748f0851
+      message:
+        type: string
+        example: caution!
+      source:
+        type: string
+        example: /members/d390f1ee-6c54-4b01-90e6-d701748f0851
+      readAt:
+        type: string
+        format: date-time
+        example: 2018-11-16T17:32:28Z
+      createdAt:
+        type: string
+        format: date-time
+        example: 2018-11-16T16:32:28Z
+
+# Added by API Auto Mocking Plugin
+host: localhost:3000
+basePath: /api/v1
+schemes:
+- http
